@@ -27,7 +27,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
         clients.inMemory()
             .withClient("SampleClientId")
             .secret(passwordEncoder.encode("secret"))
-            .authorizedGrantTypes("authorization_code")
+            .authorizedGrantTypes("authorization_code", "implicit")
             .scopes("user_info")
             .autoApprove(true)
             .redirectUris("http://localhost:8082/ui/login","http://localhost:8083/ui2/login","http://localhost:8082/login","http://www.example.com/")

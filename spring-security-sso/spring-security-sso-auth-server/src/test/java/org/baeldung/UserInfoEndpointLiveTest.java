@@ -3,6 +3,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +14,38 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
 public class UserInfoEndpointLiveTest {
-    
+
+    @Test
+    public void givenAccessTokenUsingImplicitFlow_whenAccessUserInfoEndpoint_thenSuccess() {
+        String accessToken = obtainAccessTokenUsingAuthorizationImplicitFlow("john","123");
+        Response response = RestAssured.given().header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken).get("http://localhost:8081/auth/user/me");
+
+        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+        assertEquals("john", response.jsonPath().get("name"));
+    }
+
+    private String obtainAccessTokenUsingAuthorizationImplicitFlow(String username, String password) {
+        final String authServerUri = "http://localhost:8081/auth";
+        final String redirectUrl = "http://www.example.com/";
+        final String authorizeUrl = authServerUri + "/oauth/authorize?response_type=token&client_id=SampleClientId&redirect_uri=" + redirectUrl;
+
+        // user login
+        Response response = RestAssured.given().formParams("username", username, "password", password).post(authServerUri + "/login");
+        final String cookieValue = response.getCookie("JSESSIONID");
+
+        // get access token
+        response = RestAssured.given().cookie("JSESSIONID", cookieValue).post(authorizeUrl);
+        assertEquals(HttpStatus.FOUND.value(), response.getStatusCode());
+        final String location = response.getHeader(HttpHeaders.LOCATION);
+
+        final Matcher matcher = Pattern.compile("#access_token=([^&]+)").matcher(location);
+        matcher.find();
+
+        final String accessToken = matcher.group(1);
+
+        return accessToken;
+    }
+
     @Test
     public void givenAccessToken_whenAccessUserInfoEndpoint_thenSuccess() {
         String accessToken = obtainAccessTokenUsingAuthorizationCodeFlow("john","123");
