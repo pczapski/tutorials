@@ -1,6 +1,5 @@
 package org.baeldung.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -13,11 +12,14 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 @EnableAuthorizationServer
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     
-    @Autowired    
-    private BCryptPasswordEncoder passwordEncoder;
-    
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    public AuthServerConfig(BCryptPasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
-    public void configure(final AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+    public void configure(final AuthorizationServerSecurityConfigurer oauthServer) {
         oauthServer.tokenKeyAccess("permitAll()")
             .checkTokenAccess("isAuthenticated()");
     }
@@ -30,10 +32,14 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
             .authorizedGrantTypes("authorization_code", "implicit")
             .scopes("user_info")
             .autoApprove(true)
-            .redirectUris("http://localhost:8082/ui/login","http://localhost:8083/ui2/login","http://localhost:8082/login","http://www.example.com/")
+            .redirectUris(
+                    "http://localhost:8082/ui/login",
+                    "http://localhost:8083/ui2/login",
+                    "http://localhost:8082/login",
+                    "http://www.example.com/",
+                    "http://localhost:8010/webjars/springfox-swagger-ui/oauth2-redirect.html"
+            )
         // .accessTokenValiditySeconds(3600)
         ; // 1 hour
     }
-
-
 }

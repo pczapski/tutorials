@@ -1,0 +1,6 @@
+security:
+  oauth2:
+    resource:
+      userInfoUri: http://localhost:8081/auth/user/me
+server:
+  port: 8010

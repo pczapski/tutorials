@@ -19,6 +19,7 @@
         <module>spring-security-sso-ui</module>
         <module>spring-security-sso-ui-2</module>
         <module>spring-security-sso-kerberos</module>
+        <module>spring-security-resource-server</module>
     </modules>
 
     <properties>
